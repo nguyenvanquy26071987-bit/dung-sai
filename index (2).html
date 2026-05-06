@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò Chơi Trắc Nghiệm Đúng/Sai - Toán 11</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 850px;
+            overflow: hidden;
+        }
+        .quiz-header {
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .quiz-header h1 {
+            margin: 0;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .progress-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .quiz-body {
+            padding: 35px;
+        }
+        .main-question {
+            font-size: 19px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: #2c3e50;
+            border-left: 6px solid #e74c3c;
+            padding-left: 15px;
+            background-color: #fcfcfc;
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+        }
+        .sub-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        .sub-text {
+            flex: 1;
+            font-size: 18px;
+            margin-right: 20px;
+            line-height: 1.5;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            min-width: 180px;
+        }
+        .btn-option {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            background-color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            color: #7f8c8d;
+            transition: 0.2s;
+        }
+        .btn-option:hover {
+            border-color: #95a5a6;
+            background-color: #f1f2f6;
+        }
+        
+        /* Trạng thái đã chọn */
+        .btn-option.selected-true {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .btn-option.selected-false {
+            background-color: #e67e22;
+            color: white;
+            border-color: #e67e22;
+        }
+        
+        /* Trạng thái sau khi chốt đáp án */
+        .sub-question.correct-row {
+            background-color: #e8f8f5;
+            border-color: #2ecc71;
+        }
+        .sub-question.wrong-row {
+            background-color: #fdedec;
+            border-color: #e74c3c;
+        }
+        
+        .footer-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px dashed #ddd;
+        }
+        .btn-action {
+            padding: 14px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn-check {
+            background-color: #27ae60;
+        }
+        .btn-check:hover { background-color: #2ecc71; transform: translateY(-2px); }
+        
+        .btn-next {
+            background-color: #8e44ad;
+            display: none;
+        }
+        .btn-next:hover { background-color: #9b59b6; transform: translateY(-2px); }
+        
+        .score-display {
+            font-size: 20px;
+            font-weight: bold;
+            color: #c0392b;
+        }
+        .result-icon {
+            font-size: 22px;
+            margin-left: 10px;
+            display: none;
+        }
+
+        /* Responsive cho điện thoại/máy chiếu nhỏ */
+        @media (max-width: 650px) {
+            .sub-question {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .btn-group {
+                margin-top: 15px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1>Thử Thách: Đúng Hay Sai?</h1>
+        <div class="progress-badge" id="progress-text">Câu 1 / 6</div>
+    </div>
+    
+    <div class="quiz-body">
+        <div class="main-question" id="main-q-text">
+            Đang tải dữ liệu...
+        </div>
+        
+        <div id="options-container">
+            <!-- 4 ý a, b, c, d sẽ được JS render tự động tại đây -->
+        </div>
+        
+        <div class="footer-controls">
+            <div class="score-display" id="score-text"></div>
+            <div>
+                <button class="btn-action btn-check" id="btn-submit" onclick="checkAnswers()">Chốt Đáp Án</button>
+                <button class="btn-action btn-next" id="btn-next" onclick="nextQuestion()">Câu Tiếp Theo ➔</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toàn bộ 6 câu hỏi thuộc Phần II của tài liệu
+    const quizData = [
+        {
+            stem: "Câu 1: Cho hai số thực a và b, với 1 < a < b. Xét tính đúng sai của các khẳng định sau:",
+            options: [
+                { id: 0, text: "a) log<sub>a<sup>5</sup></sub>(b) = 5 log<sub>a</sub>(b)", answer: false },
+                { id: 1, text: "b) log<sub>a</sub>(b) > 1", answer: true },
+                { id: 2, text: "c) log<sub>a</sub>(b<sup>3</sup>) + log<sub>a</sub>(b<sup>6</sup>) = 6 / log<sub>b</sub>(a)", answer: false },
+                { id: 3, text: "d) Nếu a<sup>2</sup> + b<sup>2</sup> = 7ab thì log<sub>3</sub>(a+b) = 1 + log<sub>3</sub>(a) + log<sub>3</sub>(b)", answer: false }
+            ]
+        },
+        {
+            stem: "Câu 2: Cho hình chóp S.ABCD có SA &perp; (ABCD), SA = a&radic;3, ABCD là hình vuông cạnh bằng a. Khi đó:",
+            options: [
+                { id: 0, text: "a) BD &perp; (SAC)", answer: true },
+                { id: 1, text: "b) Góc giữa đường thẳng SC và mặt phẳng (ABCD) là góc ASC", answer: false },
+                { id: 2, text: "c) Thể tích khối chóp S.ABCD bằng (a<sup>3</sup>&radic;3) / 3", answer: true },
+                { id: 3, text: "d) Khoảng cách từ điểm A đến mặt phẳng (SBC) là d(A,(SBC)) = (a&radic;3) / 3", answer: false }
+            ]
+        },
+        {
+            stem: "Câu 3: Cho khối chóp tứ giác đều S.ABCD có AB = a, SA = (a&radic;6) / 3. Xét tính đúng sai của các khẳng định sau:",
+            options: [
+                { id: 0, text: "a) Chiều cao của khối chóp S.ABCD bằng (a&radic;6) / 6", answer: true },
+                { id: 1, text: "b) Thể tích của khối chóp S.ABCD bằng (a<sup>3</sup>&radic;6) / 6", answer: false },
+                { id: 2, text: "c) Số đo góc giữa đường thẳng SA và mặt phẳng (ABCD) bằng 30&deg;", answer: true },
+                { id: 3, text: "d) Côsin của số đo góc nhị diện [S, CD, B] bằng &radic;15 / 15", answer: false }
+            ]
+        },
+        {
+            stem: "Câu 4: Tại vòng chung kết của một kì Đại hội thể thao, An thi môn bắn cung và Bình thi môn chạy với xác suất giành được huy chương vàng lần lượt là 0,7 và 0,85. Gọi A là biến cố 'An giành huy chương vàng' và B là biến cố 'Bình giành huy chương vàng'. Khi đó:",
+            options: [
+                { id: 0, text: "a) Xác suất để có đúng 1 bạn giành được huy chương vàng là 0,64", answer: false },
+                { id: 1, text: "b) AB là biến cố 'An và Bình cùng giành huy chương vàng'", answer: true },
+                { id: 2, text: "c) P(AB) = 0,255", answer: false },
+                { id: 3, text: "d) A, B là hai biến cố độc lập", answer: true }
+            ]
+        },
+        {
+            stem: "Câu 5: Một hộp có 18 viên bi, trong đó có 7 viên đỏ (đánh số 1-7), 6 viên xanh (đánh số 1-6) và 5 viên vàng (đánh số 1-5). Lấy ngẫu nhiên ra 3 viên bi. Khi đó:",
+            options: [
+                { id: 0, text: "a) Xác suất để lấy được 3 viên bi mầu đỏ là 35 / 816", answer: true },
+                { id: 1, text: "b) Xác suất để lấy được 3 viên bi cùng mầu là 67 / 816", answer: false },
+                { id: 2, text: "c) Xác suất để lấy được 3 viên bi đủ cả ba mầu là 35 / 136", answer: true },
+                { id: 3, text: "d) Xác suất để lấy được 3 viên bi khác mầu và khác số là 121 / 816", answer: false }
+            ]
+        },
+        {
+            stem: "Câu 6: Cho hàm số y = ln(x) với x > 0. Xét tính đúng sai của các khẳng định sau:",
+            options: [
+                { id: 0, text: "a) Đạo hàm của hàm số y là y' = 1 / x", answer: true },
+                { id: 1, text: "b) Đạo hàm cấp hai của hàm số y là y'' = -1 / x<sup>4</sup>", answer: false },
+                { id: 2, text: "c) y'(1) = 1", answer: true },
+                { id: 3, text: "d) y''(2) = -1 / 4", answer: true }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    // Mảng lưu trữ lựa chọn của người chơi
+    let userSelections = [null, null, null, null];
+    let isChecked = false;
+
+    // Khởi chạy khi trang web tải xong
+    window.onload = () => {
+        loadQuestion(currentQuestionIndex);
+    };
+
+    function loadQuestion(index) {
+        const qData = quizData[index];
+        document.getElementById("main-q-text").innerHTML = qData.stem;
+        document.getElementById("progress-text").innerText = `Câu ${index + 1} / ${quizData.length}`;
+        
+        const container = document.getElementById("options-container");
+        container.innerHTML = ""; // Làm sạch dữ liệu cũ
+        userSelections = [null, null, null, null];
+        isChecked = false;
+        
+        document.getElementById("btn-submit").style.display = "block";
+        document.getElementById("btn-next").style.display = "none";
+        document.getElementById("score-text").innerHTML = "";
+
+        // Tạo 4 hàng tương ứng với 4 ý
+        qData.options.forEach((opt, i) => {
+            const subRow = document.createElement("div");
+            subRow.className = "sub-question";
+            subRow.id = `row-${i}`;
+            
+            subRow.innerHTML = `
+                <div class="sub-text">${opt.text} <span class="result-icon" id="icon-${i}"></span></div>
+                <div class="btn-group">
+                    <button class="btn-option" id="btn-true-${i}" onclick="selectOption(${i}, true)">ĐÚNG</button>
+                    <button class="btn-option" id="btn-false-${i}" onclick="selectOption(${i}, false)">SAI</button>
+                </div>
+            `;
+            container.appendChild(subRow);
+        });
+    }
+
+    function selectOption(itemIndex, value) {
+        if (isChecked) return; // Khóa chức năng chọn khi đã nộp bài
+
+        userSelections[itemIndex] = value;
+        
+        // Gỡ bỏ CSS đang hiển thị
+        document.getElementById(`btn-true-${itemIndex}`).classList.remove("selected-true");
+        document.getElementById(`btn-false-${itemIndex}`).classList.remove("selected-false");
+        
+        // Thêm CSS cho nút được bấm
+        if (value === true) {
+            document.getElementById(`btn-true-${itemIndex}`).classList.add("selected-true");
+        } else {
+            document.getElementById(`btn-false-${itemIndex}`).classList.add("selected-false");
+        }
+    }
+
+    function checkAnswers() {
+        // Cảnh báo nếu chưa làm đủ 4 ý
+        if (userSelections.includes(null)) {
+            alert("Vui lòng tích chọn đầy đủ đáp án (Đúng/Sai) cho cả 4 ý trước khi chốt!");
+            return;
+        }
+
+        isChecked = true;
+        let score = 0;
+        const qData = quizData[currentQuestionIndex];
+
+        // Duyệt qua từng ý để đối chiếu với đáp án chuẩn
+        qData.options.forEach((opt, i) => {
+            const row = document.getElementById(`row-${i}`);
+            const icon = document.getElementById(`icon-${i}`);
+            icon.style.display = "inline-block";
+
+            // Vô hiệu hóa nút để không cho bấm tiếp
+            document.getElementById(`btn-true-${i}`).disabled = true;
+            document.getElementById(`btn-false-${i}`).disabled = true;
+
+            if (userSelections[i] === opt.answer) {
+                row.classList.add("correct-row");
+                icon.innerHTML = "✅";
+                score++;
+            } else {
+                row.classList.add("wrong-row");
+                icon.innerHTML = "❌";
+            }
+        });
+
+        // Hiển thị tổng kết điểm của câu hỏi
+        document.getElementById("score-text").innerHTML = `Thành tích: Trả lời chính xác ${score}/4 ý`;
+        document.getElementById("btn-submit").style.display = "none";
+        
+        // Kiểm tra xem đã đến câu cuối chưa
+        if (currentQuestionIndex < quizData.length - 1) {
+            document.getElementById("btn-next").style.display = "block";
+        } else {
+            document.getElementById("btn-next").style.display = "block";
+            document.getElementById("btn-next").innerText = "Chơi Lại Từ Đầu ↺";
+            document.getElementById("btn-next").onclick = () => {
+                currentQuestionIndex = 0;
+                loadQuestion(currentQuestionIndex);
+                document.getElementById("btn-next").onclick = nextQuestion; // Phục hồi event gốc
+                document.getElementById("btn-next").innerText = "Câu Tiếp Theo ➔";
+            };
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        loadQuestion(currentQuestionIndex);
+    }
+</script>
+
+</body>
+</html>
